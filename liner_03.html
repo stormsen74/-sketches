@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>liner v .3</title>
+        <style type="text/css">
+            html, body {
+                background: #222;
+                margin: 0;
+                overflow: hidden;
+            }
+        </style>
+        <script src="js/one-color.js"></script>
+    </head>
+    
+    <body>
+        <canvas id='canvas' width="800" height="500">Canvas not supported!</canvas>
+        <script src="js/Vector2D.js"></script>
+        <script src="js/jquery-1.8.2.min.js"></script>
+        <script src="js/utils/mathUtils.js"></script>
+        <script>
+            window.requestAnimFrame = (function() {
+                return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+            })();
+
+            /*--------------------------------------------
+			 ~ Particle
+			 --------------------------------------------*/
+
+            function Particle(x, y) {
+                this.init(x, y);
+            }
+
+
+            Particle.prototype = {
+
+                init: function(x, y) {
+
+                    this.radius = 2;
+
+                    this.x = x || 0.0;
+                    this.y = y || 0.0;
+
+                },
+
+                jitter: function(jX, jY) {
+
+                    this.x += Math.random() * jX - jX * 0.5;
+                    this.y += Math.random() * jY - jY * 0.5;
+                },
+
+                draw: function(ctx) {
+
+                    ctx.beginPath();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#ffaa00'
+                    // ctx.fillStyle = '#fff';
+                    ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+                    ctx.stroke();
+                    // ctx.fill();
+
+                }
+            };
+
+            /*--------------------------------------------
+			 ~ init
+			 --------------------------------------------*/
+
+            var MAX_PARTICLES = 20;
+            var TWO_PI = 3.14 * 2;
+
+            var particles = [];
+            var v;
+            var pool = [];
+            var canvas, context, bounds;
+
+            function setup() {
+
+                canvas = document.getElementById("canvas");
+                context = canvas.getContext("2d");
+
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                bounds = {
+                    x1: 0,
+                    y1: 0,
+                    x2: canvas.width,
+                    y2: canvas.height
+                };
+
+                console.log('setup')
+
+                v = new Vector2D();
+            }
+            
+            
+            
+
+            function plot(x, y) {
+
+                if (particles.length >= MAX_PARTICLES) {
+                    pool.push(particles.shift());
+                }
+
+                particle = pool.length ? pool.pop() : new Particle();
+                particle.init(x, y);
+
+                particles.push(particle);
+            };
+
+            function update() {
+
+                for (var i = 0; i < particles.length - 1; i++) {
+                    particles[i].jitter(4, 4);
+                    particles[i].draw(context);
+
+                }
+
+            };
+
+            function draw() {
+
+                // context.globalCompositeOperation = 'xor';
+                context.globalCompositeOperation = 'lighter';
+
+                context.beginPath();
+
+                var hue, heatColor = one.color('#0000ff');
+
+                // for (var i = particles.length - 1; i >= 0; i--) {
+                for (var i = 0; i < particles.length - 1; i++) {
+
+                    if (particles[i]) {
+                        context.moveTo(particles[i].x, particles[i].y);
+                    }
+
+                    if (particles[i - 1]) {
+                        context.lineTo(particles[i - 1].x, particles[i - 1].y);
+                    }
+
+                    hue = mathUtils.convertToRange(i, [0, particles.length], [0, .1]);
+                    heatColor = one.color(heatColor.cssa()).hue(hue);
+
+                    context.strokeStyle = heatColor.cssa();
+                    context.lineWidth = (2 / i) * 2;
+
+                    context.shadowColor = heatColor.cssa();
+                    context.shadowBlur = 10;
+
+                    context.stroke();
+                }
+
+            };
+
+            function checkArray() {
+                setTimeout(checkArray, 60);
+
+                if (particles.length > 0) {
+                    particles.shift()
+                }
+            }
+
+            function updateVec() {
+                setTimeout(updateVec, 45);
+
+                v.toPolar();
+
+                // radius
+                v.x = 120;
+                // angle (rad)
+                v.y += .1;
+
+                v.toCartesian();
+
+                plot(v.x + canvas.width * .5, v.y + canvas.height * .5);
+            }
+
+            function animate() {
+                requestAnimFrame(animate);
+
+                context.clearRect(bounds.x1, bounds.y1, bounds.x2, bounds.y2);
+
+                update();
+                draw();
+
+            }
+
+            $(document).mousemove(function(e) {
+
+                //plot(e.pageX, e.pageY);
+            });
+
+            $(document).ready(function() {
+                setup();
+                animate();
+                updateVec();
+                checkArray();
+
+            });
+        </script>
+    </body>
+
+</html>

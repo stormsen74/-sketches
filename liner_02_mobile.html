@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>liner v .2</title>
+        <style type="text/css">
+            html, body {
+                background: #222;
+                margin: 0;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id='canvas' width="800" height="500">
+            Canvas not supported!
+        </canvas>
+
+        <script src="js/one-color.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="js/utils/mathUtils.js"></script>
+
+        <script>
+			window.requestAnimFrame = (function() {
+				return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+				function(callback) {
+					window.setTimeout(callback, 1000 / 60);
+				};
+			})();
+
+			/*--------------------------------------------
+			 ~ particle
+			 --------------------------------------------*/
+
+			function Particle(x, y) {
+				// this.init(x, y);
+			}
+
+
+			Particle.prototype = {
+
+				init : function(x, y) {
+
+					this.x = x || 0.0;
+					this.y = y || 0.0;
+
+				},
+
+				jitter : function(jX, jY) {
+
+					this.x += Math.random() * jX - jX * 0.5;
+					this.y += Math.random() * jY - jY * 0.5;
+
+				},
+			};
+
+			/*--------------------------------------------
+			 ~ setup
+			 --------------------------------------------*/
+			
+			var isMobile = false;
+
+			var MAX_PARTICLES = 20;
+			var TWO_PI = 3.14 * 2;
+			var heatColor = one.color('#ffa800');
+			var hue;
+
+			var particles = [];
+			var pool = [];
+			var canvas, context, bounds;
+
+			function setup() {
+
+				canvas = document.getElementById("canvas");
+				context = canvas.getContext("2d");
+
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+
+				bounds = {
+					x1 : 0,
+					y1 : 0,
+					x2 : canvas.width,
+					y2 : canvas.height
+				};
+
+			}
+
+			function animate() {
+				requestAnimFrame(animate);
+
+				context.fillStyle = "rgba(60,25,115,0.01)";
+				context.fillRect(bounds.x1, bounds.y1, bounds.x2, bounds.y2);
+
+				update();
+				draw();
+
+			}
+
+			function checkArray() {
+				setTimeout(checkArray, 60);
+
+				if (particles.length > 0) {
+					particles.shift();
+				}
+			}
+
+			function update() {
+
+				// for (var i = 0; i < particles.length - 1; i++) {
+				for (var i = 0, len = particles.length - 1; i < len; i++) {
+					particles[i].jitter(5, 5);
+				}
+
+			};
+
+			function draw() {
+
+				// context.globalCompositeOperation = 'xor';
+				// context.globalCompositeOperation = 'lighter';
+
+				context.beginPath();
+
+				// for (var i = 0; i < particles.length - 1; i++) {
+				for (var i = 0, len = particles.length; i < len; i++) {
+
+					if (particles[i]) {
+						context.moveTo(particles[i].x, particles[i].y);
+					}
+
+					if (particles[i - 1]) {
+						context.lineTo(particles[i - 1].x, particles[i - 1].y);
+					}
+
+					hue = mathUtils.convertToRange(i, [0, particles.length], [0, .2]);
+					heatColor = one.color(heatColor.cssa()).hue(hue);
+
+					context.strokeStyle = heatColor.cssa();
+
+					context.lineWidth = Math.min((6 / i) * 6, 5);
+					// context.lineWidth = 2;
+
+					// context.shadowColor = heatColor.cssa();
+					// context.shadowBlur = 10;
+
+					context.stroke();
+
+				}
+
+			};
+
+			function plot(x, y) {
+
+				if (particles.length >= MAX_PARTICLES) {
+					pool.push(particles.shift());
+				}
+
+				particle = pool.length ? pool.pop() : new Particle();
+				particle.init(x, y);
+
+				particles.push(particle);
+			};
+
+			/*---------------------------------------------------
+			 ~ mobile -> switch
+			 ---------------------------------------------------*/
+
+			if (isMobile) {
+
+				$(document).on('touchmove', function(event) {
+					var touch = event.originalEvent.touches[0];
+					plot(touch.pageX, touch.pageY);
+					return false;
+				});
+
+			} else {
+
+				$(document).mousemove(function(e) {
+					plot(e.pageX, e.pageY);
+				});
+
+			}
+
+			/*---------------------------------------------------
+			 ~ init
+			 ---------------------------------------------------*/
+
+			$(document).ready(function() {
+				setup();
+				animate();
+				checkArray();
+			});
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <style type="text/css">
+            html, body {
+                margin: 0;
+                background: #222;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script src="js/sketch.js"></script>
+        <script type="text/javascript" src="js/Vector2D.js"></script>
+
+        <script>
+			/*--------------------------------------------
+			 ~ Point
+			 --------------------------------------------*/
+			function Point(x, y) {
+				this.x = x;
+				this.y = y;
+			}
+
+
+			Point.prototype = {
+                
+			}
+
+			Point.distance = function(p2, p1) {
+				return Math.sqrt(Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2))
+			};
+
+
+			/*--------------------------------------------
+			 ~ Particle
+			 --------------------------------------------*/
+
+			function Particle(x, y, radius) {
+				this.init(x, y, radius);
+			}
+
+
+			Particle.prototype = {
+
+				init : function(x, y, radius) {
+
+					this.alive = true;
+
+					this.radius = radius || 10;
+					this.maxRadius = radius;
+					this.wander = 0.15;
+					this.theta = random(TWO_PI);
+					this.drag = 0.92;
+					this.color = '#fff';
+
+					this.x = x || 0.0;
+					this.y = y || 0.0;
+
+					this.vx = 0.0;
+					this.vy = 0.0;
+				},
+
+				move : function() {
+
+					//this.x += this.vx;
+					//this.y += this.vy;
+
+					this.vx *= this.drag;
+					this.vy *= this.drag;
+
+					// this.theta += random(-0.5, 0.5) * this.wander;
+					this.theta += .01;
+					this.vx += sin(this.theta) * 0.1;
+					this.vy += cos(this.theta) * 0.1;
+
+					//this.radius *= 0.96;
+					this.radius = sin(this.theta) * this.maxRadius * .5;
+					this.alive = this.radius > 0.5;
+				},
+
+				draw : function(ctx) {
+
+					// ctx.beginPath();
+					// ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+					// ctx.fillStyle = this.color;
+					// ctx.fill();
+
+					if (this.radius > 0) {
+						ctx.beginPath();
+						ctx.strokeStyle = this.color;
+						ctx.lineWidth = 1;
+						ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+						ctx.stroke();
+					}
+
+				}
+			};
+			// ----------------------------------------
+			// Example
+			// ----------------------------------------
+
+			var COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+
+			var centerX;
+			var centerY;
+
+			var p;
+			var particles = [];
+			var kochLines, kochLine;
+			var c = 0
+
+			var demo = Sketch.create({
+				container : document.getElementById('container'),
+				autoclear : false,
+
+			});
+
+			demo.setup = function() {
+				console.log('setup');
+
+				centerX = demo.width * .5;
+				centerY = demo.height * .5;
+
+				// p = new Particle();
+				// p.init(centerX, centerY, 100);
+				// p.draw(demo);
+
+				/*--------------------------------------------
+				~ recursive calls
+				--------------------------------------------*/
+//				 createCircle(centerX, centerY, demo.height);
+
+//				 cantor(0, centerY, demo.width)
+
+				lines(centerX, centerY, demo.width * .5 - 100);
+
+			};
+
+
+			function createCircle(x, y, radius) {
+				// p = new Particle();
+				// p.init(x, y, radius);
+				// particles.push(p);
+				// p.draw(demo);
+
+				demo.beginPath();
+				demo.strokeStyle = '#E0E4CC';
+				demo.lineWidth = 1;
+				demo.arc(x, y, radius, 0, TWO_PI);
+				demo.stroke();
+
+				if (radius > 50) {
+					createCircle(x + radius / 2, y, radius / 2)
+					createCircle(x - radius / 2, y, radius / 2)
+
+					createCircle(x, y + radius / 2, radius / 2)
+					createCircle(x, y - radius / 2, radius / 2)
+				}
+
+			}
+
+			function cantor(x, y, len) {
+				if (len >= 1) {
+					demo.beginPath();
+					demo.strokeStyle = '#F38630';
+					demo.lineWidth = 1;
+					demo.moveTo(x, y);
+					demo.lineTo(x + len, y);
+					demo.stroke();
+
+					y += 20;
+					cantor(x, y, len / 3);
+					cantor(x + len * 2 / 3, y, len / 3);
+				}
+			}
+
+			function lines(x, y, len) {
+
+				// c++;
+				// console.log(c)
+
+				demo.beginPath();
+				demo.strokeStyle = '#F38630';
+				demo.lineWidth = 1;
+				demo.moveTo(parseInt(x - len * .5), parseInt(y));
+				demo.lineTo(parseInt(x + len * .5), parseInt(y));
+				demo.stroke();
+
+				if (len > 20) {
+
+					demo.save();
+					demo.translate(parseInt(x - len / 2), parseInt(y - len * .5 * .5))
+					demo.rotate(HALF_PI)
+					demo.beginPath();
+					demo.strokeStyle = '#F38630';
+					demo.lineWidth = 1;
+					demo.moveTo(0, 0);
+					demo.lineTo(parseInt(len * .5), 0);
+					demo.stroke();
+					demo.restore();
+
+					demo.save();
+					demo.translate(parseInt(x + len / 2), parseInt(y - len * .5 * .5))
+					demo.rotate(HALF_PI)
+					demo.beginPath();
+					demo.strokeStyle = '#F38630';
+					demo.lineWidth = 1;
+					demo.moveTo(0, 0);
+					demo.lineTo(parseInt(len * .5), 0);
+					demo.stroke();
+					demo.restore();
+
+					lines(x - len / 2, y - len * .5 * .5, len * .5);
+					lines(x + len / 2, y - len * .5 * .5, len * .5);
+
+					lines(x - len / 2, y + len * .5 * .5, len * .5);
+					lines(x + len / 2, y + len * .5 * .5, len * .5);
+
+				}
+
+			}
+
+
+			demo.update = function() {
+			}
+
+			demo.draw = function() {
+			};
+
+			// function drawCall() {
+			// demo.strokeStyle = '#f00';
+			// demo.lineWidth = 3;
+			// demo.arc(centerX, centerY, radius, 0, TWO_PI);
+			// demo.stroke();
+			//
+			// //demo.clear();
+			// }
+
+			demo.mousemove = function() {
+				//console.log('mouseMove')
+			};
+
+        </script>
+    </body>
+</html>

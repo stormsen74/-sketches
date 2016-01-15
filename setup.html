@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <style type="text/css">
+            html, body {
+                margin: 0;
+                background: #222;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script src="js/sketch.js"></script>
+        <script>
+			// ----------------------------------------
+			// Example
+			// ----------------------------------------
+
+			var COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+			var radius = 100;
+			var centerX;
+			var centerY;
+
+			var demo = Sketch.create({
+				container : document.getElementById('container'),
+				autoclear : false,
+			});
+
+			demo.setup = function() {
+				console.log('setup');
+
+				centerX = demo.width * .5;
+				centerY = demo.height * .5;
+
+				drawCall();
+
+			};
+			
+			function drawCall() {
+				demo.strokeStyle = '#f00';
+				demo.lineWidth = 3;
+				demo.arc(centerX, centerY, radius, 0, TWO_PI);
+				demo.stroke();
+			}
+
+
+			demo.update = function() {
+				centerX = demo.width * .5;
+				centerY = demo.height * .5;
+			}
+
+			demo.resize = function() {
+				console.log('resize')
+				centerX = demo.width * .5;
+				centerY = demo.height * .5;
+
+				drawCall();
+			}
+
+			demo.draw = function() {
+				//demo.globalCompositeOperation = 'lighter';
+			};
+
+			demo.mousemove = function() {
+				console.log('mouseMove')
+			};
+
+        </script>
+    </body>
+</html>

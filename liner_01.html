@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+         <title>liner v .1</title>
+        <style type="text/css">
+            html, body {
+                background: #000;
+            }
+        </style>
+
+        <script src="js/utils/mathUtils.js"></script>
+        <script src="js/one-color.js"></script>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script src="js/sketch.js"></script>
+        <script>
+			// ----------------------------------------
+			// Particle
+			// ----------------------------------------
+
+			function Particle(x, y, radius) {
+				this.init(x, y, radius);
+			}
+
+
+			Particle.prototype = {
+
+				init : function(x, y, radius) {
+
+					this.radius = radius || 10;
+
+					// this.wander = 0.15;
+
+					this.color = '#fff';
+
+					this.x = x || 0.0;
+					this.y = y || 0.0;
+
+				},
+
+				move : function() {
+
+				},
+
+				draw : function(ctx) {
+
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = '#aaff00';
+					// ctx.fillStyle = this.color;
+
+					ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+					ctx.stroke();
+					// ctx.fill();
+
+				}
+			};
+
+			// ----------------------------------------
+			// Example
+			// ----------------------------------------
+
+			var MAX_PARTICLES = 20;
+			var COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+
+			var particles = [];
+			var pool = [];
+
+			var demo = Sketch.create({
+				container : document.getElementById('container'),
+//				autoclear: false
+			});
+
+			demo.setup = function() {
+
+				// Set off some initial particles.
+
+				for (var i = 0; i < MAX_PARTICLES; i++) {
+					particle = new Particle();
+					particle.init(0, 0, 5);
+				};
+
+				console.log(demo)
+			};
+
+			demo.plot = function(x, y) {
+
+				if (particles.length >= MAX_PARTICLES)
+					pool.push(particles.shift());
+
+				particle = pool.length ? pool.pop() : new Particle();
+				particle.init(x, y, 3);
+
+				particles.push(particle);
+			};
+
+			demo.update = function() {
+
+				if (particles.length > 0) {
+					particles.shift()
+				}
+
+			};
+
+			demo.draw = function() {
+
+//				 demo.globalCompositeOperation = 'xor';
+				demo.globalCompositeOperation = 'lighter';
+//
+				demo.beginPath();
+
+				var hue, heatColor = one.color('#0000ff');
+
+				// for (var i = particles.length - 1; i >= 0; i--) {
+				for (var i = 2; i < particles.length - 1; i++) {
+
+					// particles[i].draw(demo);
+
+					if (particles[i]) {
+						demo.moveTo(particles[i].x, particles[i].y);
+					}
+
+					if (particles[i - 1]) {
+						demo.lineTo(particles[i - 1].x, particles[i - 1].y);
+					}
+
+					hue = mathUtils.convertToRange(i, [2, particles.length], [0, .1]);
+					heatColor = one.color(heatColor.cssa()).hue(hue);
+
+					demo.strokeStyle = heatColor.cssa();
+
+					demo.lineWidth = (2 / i) * 2;
+
+					demo.shadowColor = heatColor.cssa();
+					demo.shadowBlur = 10;
+
+					demo.stroke();
+
+				}
+
+			};
+
+			demo.mousemove = function() {
+			    
+				var touch;
+
+				for (i = 0, n = demo.touches.length; i < n; i++) {
+					touch = demo.touches[i];
+					demo.plot(touch.x, touch.y);
+				}
+
+			};
+
+        </script>
+    </body>
+</html>

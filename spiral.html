@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="js/TweenLite.min.js"></script>
+    <script src="js/Vector2D.js"></script>
+    <script src="js/color.js"></script>
+    <script src="js/sketch.js"></script>
+
+    <style type="text/css">
+        html, body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="container"></div>
+
+
+<script>
+
+    var mouseDown = false;
+    var deltaT = 0;
+
+    var c = net.brehaut.Color;
+    var color = c("#00FF00");
+    console.log(color.toCSS());
+
+
+    var demo = Sketch.create({
+        container: document.getElementById('container'),
+        type: Sketch.CANVAS,
+        autoclear: false,
+        retina: false
+    });
+
+    demo.line = function (x, y) {
+
+        demo.save();
+
+        demo.translate(x, y);
+        demo.rotate(degToRad(stepper));
+
+        demo.strokeStyle = color.toCSS();
+        demo.lineWidth = .1;
+
+        demo.beginPath();
+        demo.moveTo(-lineLength * .5, 0);
+        demo.lineTo(lineLength * .5, 0);
+//        demo.moveTo(0, 0);
+//        demo.lineTo(lineLength, 0);
+        demo.closePath();
+
+        demo.stroke();
+
+        demo.restore();
+    }
+
+    demo.plotPoint = function (x, y, radius, color) {
+        _radius = radius || 10;
+        _color = color || '#fff';
+
+        demo.beginPath();
+        demo.lineWidth = 1;
+        demo.strokeStyle = _color;
+        // ctx.fillStyle = '#fff';
+        demo.arc(x, y, _radius, 0, TWO_PI);
+        demo.stroke();
+        // ctx.fill();
+    }
+
+    var vCenter = new Vector2D(demo.width * .5, demo.height * .5)
+    var vPlot = new Vector2D(0, 0);
+
+
+    demo.setup = function () {
+        console.log('setup');
+
+        demo.plotPoint(vCenter.x, vCenter.y, 1, '#ff0000');
+
+    };
+
+
+    demo.update = function () {
+        color = color.shiftHue(1);
+        deltaT += .3;
+
+
+        vPlot.toPolar();
+        vPlot.y = Math.sqrt(deltaT);
+        vPlot.x = vPlot.y;
+        vPlot.toCartesian();
+
+//        vPlot.rotate(deltaT);
+        vPlot.multiply(10)
+
+        var vResult = Vector2D.add(vCenter, vPlot);
+        demo.plotPoint(vResult.x, vResult.y, 1, '#d48620');
+    };
+
+    demo.draw = function () {
+    };
+
+    demo.mousemove = function () {
+    };
+
+    demo.mousedown = function () {
+        mouseDown = true;
+    }
+
+    demo.mouseup = function () {
+        mouseDown = false;
+    }
+
+    degToRad = function (deg) {
+        return deg * 0.0174532925;
+    };
+
+    radToDeg = function (rad) {
+        return rad * 57.2957795;
+    };
+
+</script>
+</body>
+</html>
