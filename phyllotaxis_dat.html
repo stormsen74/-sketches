@@ -8,6 +8,7 @@
     <script src="js/Vector2D.js"></script>
     <script src="js/color.js"></script>
     <script src="js/sketch.js"></script>
+    <script src="js/dat.gui.min.js"></script>
 
     <style type="text/css">
         html, body {
@@ -45,15 +46,20 @@
     var goldenRatio = 1.61803398875;
     var fibonacciAngle = 360 / (goldenRatio * goldenRatio);
     var fibonacciAngle = 137.5;
-    var c = 12;
+    var c = 10;
     var base = 5;
-    var numPoints = 720;
-    var maxPointSize = 10;
+    var numPoints = 360;
+    var maxPointSize = 7;
 
     var mouseDown = false;
 
     var COLOR = net.brehaut.Color;
     var color = COLOR("#00FF00");
+
+
+    var clear = false;
+
+    var GUI, CONFIG;
 
 
     var demo = Sketch.create({
@@ -84,26 +90,63 @@
     demo.setup = function () {
         console.log('setup');
 
+        init_datGUI();
+
         demo.plotPoint(vCenter.x, vCenter.y, 1, '#ff0000');
 
-        for (var n = 1; n < numPoints; n++) {
+//        for (var n = 1; n < numPoints; n++) {
+//
+//            var r = c * Math.sqrt(n);
+//            var theta = fibonacciAngle * n * base;
+//            var x = r * Math.cos(theta);
+//            var y = r * Math.sin(theta);
+//
+//            color = color.setHue(convertToRange(n, [0, numPoints], [120, 270]))
+//            demo.plotPoint(vCenter.x + x, vCenter.y + y, n / numPoints * maxPointSize, color.toCSS());
+//
+//        }
+    };
+
+
+    function init_datGUI() {
+        GUI = new dat.GUI({width: 300, closed: false});
+
+        this.CONFIG = {};
+        this.CONFIG.INFO = 'PARAMS';
+//        this.CONFIG.BLUR_TYPE = 'GAUSSIAN_BLUR';
+//        this.CONFIG.FILTER = this.filter;
+        CONFIG.NUM_POINTS = 360;
+
+
+        var _radius = GUI.add(CONFIG, 'NUM_POINTS').min(0).max(720).step(1).onChange(update_datGUI);
+    }
+
+
+    function update_datGUI() {
+
+    }
+
+
+    demo.update = function () {
+
+        for (var n = 1; n < CONFIG.NUM_POINTS; n++) {
 
             var r = c * Math.sqrt(n);
             var theta = fibonacciAngle * n * base;
             var x = r * Math.cos(theta);
             var y = r * Math.sin(theta);
 
-            color = color.setHue(convertToRange(n, [0, numPoints], [0, 360]))
-            demo.plotPoint(vCenter.x + x, vCenter.y + y, n / numPoints * maxPointSize, color.toCSS());
+            color = color.setHue(convertToRange(n, [0, CONFIG.NUM_POINTS], [120, 270]))
+            demo.plotPoint(vCenter.x + x, vCenter.y + y, n / CONFIG.NUM_POINTS * maxPointSize, color.toCSS());
 
         }
-    };
 
 
-    demo.update = function () {
     };
 
     demo.draw = function () {
+
+
     };
 
     demo.mousemove = function () {
