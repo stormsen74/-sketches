@@ -27,7 +27,8 @@
 <script>
 
     var mouseDown = false;
-    var deltaT = 0;
+    var phi = 0;
+    var deltaT = 0
 
     var c = net.brehaut.Color;
     var color = c("#00FF00");
@@ -66,7 +67,7 @@
     demo.plotPoint = function (x, y, radius, color, colorShape) {
         _radius = radius || 10;
         _color = color || '#fff';
-        _colorShape = colorShape || '#fff';
+        _colorShape = colorShape || '#ccc';
 
         demo.beginPath();
         demo.lineWidth = 1;
@@ -78,7 +79,8 @@
     }
 
     var vCenter = new Vector2D(demo.width * .5, demo.height * .5)
-    var vPlot = new Vector2D(0, 0);
+    var vPlot = new Vector2D(0, 100);
+    var vAdd = new Vector2D(0, 1);
 
 
     demo.setup = function () {
@@ -91,22 +93,23 @@
 
     demo.update = function () {
         color = color.shiftHue(1);
-        deltaT += .3;
-
+        phi += .01;
+        deltaT += .001;
 
         vPlot.toPolar();
-        vPlot.y = Math.sqrt(deltaT);
-        vPlot.x = vPlot.y;
+        vPlot.y = phi;
+        vPlot.x = 200 + 50 * Math.cos(5 * phi);
         vPlot.toCartesian();
 
-//        vPlot.rotate(deltaT);
-        vPlot.multiply(10)
+        vPlot.rotate(deltaT);
+
+    }
+    ;
+
+    demo.draw = function () {
 
         var vResult = Vector2D.add(vCenter, vPlot);
         demo.plotPoint(vResult.x, vResult.y, 1, '#d48620');
-    };
-
-    demo.draw = function () {
     };
 
     demo.mousemove = function () {

@@ -36,8 +36,8 @@ Vector2D.prototype = {
 
     toPolar: function () {
         var r = Math.sqrt(this.x * this.x + this.y * this.y);
-        this.y = Math.atan2(this.y, this.x);
         this.x = r;
+        this.y = Math.atan2(this.y, this.x);
         return this;
     },
 
