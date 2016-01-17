@@ -30,13 +30,16 @@
     var mouseDown = false;
     var phi = 0;
 
-    var numSteps = 720;
+    var numSteps = 360;
     var stepLength = 2 * Math.PI / numSteps;
+
+
+    var stepper = 0;
 
     var GUI, CONFIG;
 
     var c = net.brehaut.Color;
-    var color = c("#00FF00");
+    var color = c("#ffffff");
     console.log(color.toCSS());
 
 
@@ -47,15 +50,18 @@
         retina: false
     });
 
-    demo.line = function (x, y) {
+    demo.line = function (x, y, rotation) {
+
+        lineLength = 150;
 
         demo.save();
 
         demo.translate(x, y);
-        demo.rotate(degToRad(stepper));
+//        demo.rotate(degToRad(rotation));
+        demo.rotate(rotation);
 
         demo.strokeStyle = color.toCSS();
-        demo.lineWidth = .1;
+        demo.lineWidth = .5;
 
         demo.beginPath();
         demo.moveTo(-lineLength * .5, 0);
@@ -99,11 +105,15 @@
 
 
     demo.update = function () {
+        stepper += stepLength;
+
 
     };
 
 
     demo.draw = function () {
+
+        demo.globalCompositeOperation = 'add';
 
         for (var i = 0; i < numSteps; i++) {
             phi += stepLength;
@@ -116,9 +126,11 @@
 //            vPlot.rotate(radius);
 
             var vResult = Vector2D.add(vCenter, vPlot);
-            demo.plotPoint(vResult.x, vResult.y, 1, '#d48620');
+            demo.plotPoint(vResult.x, vResult.y, .1, '#d48620');
+            demo.line(vResult.x, vResult.y, Math.sin(5*phi)+stepper)
 
         }
+
     };
 
     function init_datGUI() {
@@ -126,9 +138,9 @@
 
         CONFIG = {};
         CONFIG.INFO = 'PARAMS';
-        CONFIG.RADIUS = 100;
-        CONFIG.WAVE_HEIGHT = 50;
-        CONFIG.M = 5;
+        CONFIG.RADIUS = 200;
+        CONFIG.WAVE_HEIGHT = 40;
+        CONFIG.M = 3;
 
 
         var _radius = GUI.add(CONFIG, 'RADIUS').min(-300).max(300).step(1).onChange(update_datGUI);
