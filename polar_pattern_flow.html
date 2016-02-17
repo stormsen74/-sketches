@@ -51,9 +51,9 @@
         retina: false
     });
 
-    demo.line = function (x, y, rotation) {
+    demo.line = function (x, y, rotation, length) {
 
-        lineLength = 100;
+        var length = length || 100;
 
         demo.save();
 
@@ -65,8 +65,8 @@
         demo.lineWidth = .5;
 
         demo.beginPath();
-        demo.moveTo(-lineLength * .5, 0);
-        demo.lineTo(lineLength * .5, 0);
+        demo.moveTo(-length * .5, 0);
+        demo.lineTo(length * .5, 0);
 //        demo.moveTo(0, 0);
 //        demo.lineTo(lineLength, 0);
         demo.closePath();
@@ -105,13 +105,13 @@
 
 
     demo.update = function () {
-        stepper += stepLength;
+        stepper += stepLength * CONFIG.ROTATION_SPEED;
 
 
     };
 
     var stripStart = 1;
-    var stripLength = 50;
+    var stripLength = 100;
     var stripEnd = stripStart + stripLength;
     var vResult;
 
@@ -130,6 +130,7 @@
         stripStart += 1;
         stripEnd += 1;
 
+        var numLine = 1;
 
         for (var i = 0; i < numSteps; i++) {
             phi += stepLength;
@@ -143,15 +144,26 @@
             demo.plotPoint(vResult.x, vResult.y, .1, '#d48620');
 
             if (stripStart < numSteps - stripLength + 1) {
+
                 if (i > stripStart && i < stripEnd) {
 
-                    demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper)
+                    demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper, 75 * Math.sin(convertToRange(numLine, [0, stripLength], [0, Math.PI])));
+
+                    numLine += 1;
+
+//                    console.log(numLine)
 
                 }
             } else {
+
+
                 if (i > stripStart || i < stripEnd) {
 
-                    demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper)
+//                    console.log(numLine);
+
+                    demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper, 75 * Math.sin(convertToRange(numLine, [0, stripLength], [0, Math.PI])));
+
+                    numLine += 1;
 
                 }
             }
@@ -168,11 +180,13 @@
         CONFIG.INFO = 'PARAMS';
         CONFIG.RADIUS = 200;
         CONFIG.WAVE_HEIGHT = 40;
+        CONFIG.ROTATION_SPEED = 1;
         CONFIG.M = 3;
 
 
         GUI.add(CONFIG, 'RADIUS').min(-300).max(300).step(1).onChange(update_datGUI);
         GUI.add(CONFIG, 'WAVE_HEIGHT').min(-300).max(300).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'ROTATION_SPEED').min(.01).max(3).step(.01).onChange(update_datGUI);
         GUI.add(CONFIG, 'M').min(1).max(15).step(1).onChange(update_datGUI);
     }
 
@@ -197,6 +211,15 @@
 
     radToDeg = function (rad) {
         return rad * 57.2957795;
+    };
+
+    convertToRange = function (value, srcRange, dstRange) {
+        // value is outside source range return
+        if (value < srcRange[0] || value > srcRange[1]) {
+            return NaN;
+        }
+        var srcMax = srcRange[1] - srcRange[0], dstMax = dstRange[1] - dstRange[0], adjValue = value - srcRange[0];
+        return (adjValue * dstMax / srcMax) + dstRange[0];
     };
 
 </script>
