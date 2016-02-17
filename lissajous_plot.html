@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="js/TweenLite.min.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="js/Vector2D.js"></script>
+    <script src="js/color.js"></script>
+    <script src="js/sketch.js"></script>
+
+    <style type="text/css">
+        html, body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="container"></div>
+
+
+<script>
+
+    var mouseDown = false;
+    var phi = 0;
+
+    var numSteps = 500;
+    var stepLength = 2 * Math.PI / numSteps;
+
+
+    var stepper = 0;
+
+    var GUI, CONFIG;
+
+    var c = net.brehaut.Color;
+    var color = c("#ffffff");
+    console.log(color.toCSS());
+
+
+    var demo = Sketch.create({
+        container: document.getElementById('container'),
+        type: Sketch.CANVAS,
+        autoclear: true,
+        retina: false
+    });
+
+    demo.line = function (x, y, rotation) {
+
+        lineLength = 100;
+
+        demo.save();
+
+        demo.translate(x, y);
+//        demo.rotate(degToRad(rotation));
+        demo.rotate(rotation);
+
+        demo.strokeStyle = color.toCSS();
+        demo.lineWidth = .5;
+
+        demo.beginPath();
+        demo.moveTo(-lineLength * .5, 0);
+        demo.lineTo(lineLength * .5, 0);
+//        demo.moveTo(0, 0);
+//        demo.lineTo(lineLength, 0);
+        demo.closePath();
+
+        demo.stroke();
+
+        demo.restore();
+    }
+
+    demo.lineFromTo = function (vStart, vEnd) {
+
+        demo.strokeStyle = '#ffffff';
+        demo.lineWidth = .5;
+
+        demo.moveTo(vStart.x, vStart.y);
+        demo.lineTo(vEnd.x, vEnd.y);
+        demo.stroke();
+
+    }
+
+    demo.plotPoint = function (x, y, radius, color, colorShape) {
+        _radius = radius || 10;
+        _color = color || '#fff';
+        _colorShape = colorShape || '#ccc';
+
+        demo.beginPath();
+        demo.lineWidth = 1;
+        demo.strokeStyle = _color;
+        demo.fillStyle = _colorShape;
+        demo.arc(x, y, _radius, 0, TWO_PI);
+        demo.fill();
+        demo.stroke();
+    }
+
+    var vCenter = new Vector2D(demo.width * .5, demo.height * .5)
+    var vPlot = new Vector2D(0, 0);
+    //    var vAdd = new Vector2D(0, 1);
+
+
+    demo.setup = function () {
+        console.log('setup');
+
+        demo.plotPoint(vCenter.x, vCenter.y, 1, '#ff0000');
+
+        init_datGUI();
+
+    };
+
+
+    demo.update = function () {
+        stepLength = 2 * Math.PI / CONFIG.NUM_SAMPLES;
+        stepper += stepLength * CONFIG.SPEED;
+    };
+
+
+    demo.draw = function () {
+
+        demo.globalCompositeOperation = 'add';
+
+        for (var i = 0, length = CONFIG.NUM_SAMPLES; i < length; i++) {
+            phi += stepLength;
+
+            vPlot.x = 1 * Math.sin(CONFIG.A * phi + CONFIG.DELTA + stepper);
+            vPlot.y = 1 * Math.sin(CONFIG.B * phi);
+
+            vPlot.multiply(CONFIG.MULTIPLYER);
+
+            var vResult = Vector2D.add(vCenter, vPlot);
+            demo.plotPoint(vResult.x, vResult.y, .1, '#fff');
+            demo.lineFromTo(vCenter, vResult);
+
+        }
+
+    };
+
+    function init_datGUI() {
+        GUI = new dat.GUI({width: 500, closed: false});
+
+        CONFIG = {};
+        CONFIG.INFO = 'PARAMS';
+        CONFIG.A = 1;
+        CONFIG.B = 1;
+        CONFIG.DELTA = Math.PI * .5;
+        CONFIG.SPEED = 1;
+        CONFIG.MULTIPLYER = 150;
+        CONFIG.NUM_SAMPLES = 500;
+
+
+        GUI.add(CONFIG, 'A').min(1).max(15).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'B').min(1).max(15).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'DELTA').min(0).max(TWO_PI).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'SPEED').min(0.0).max(3.0).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'MULTIPLYER').min(-300).max(300).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'NUM_SAMPLES').min(1).max(1000).step(1).onChange(update_datGUI);
+    }
+
+    function update_datGUI() {
+    }
+
+
+
+    demo.mousemove = function () {
+    };
+
+    demo.mousedown = function () {
+        mouseDown = true;
+    };
+
+    demo.mouseup = function () {
+        mouseDown = false;
+    };
+
+    degToRad = function (deg) {
+        return deg * 0.0174532925;
+    };
+
+    radToDeg = function (rad) {
+        return rad * 57.2957795;
+    };
+
+</script>
+</body>
+</html>
