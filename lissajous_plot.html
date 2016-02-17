@@ -30,7 +30,7 @@
     var mouseDown = false;
     var phi = 0;
 
-    var numSteps = 360;
+    var numSteps = 500;
     var stepLength = 2 * Math.PI / numSteps;
 
 
@@ -52,7 +52,7 @@
 
     demo.line = function (x, y, rotation) {
 
-        lineLength = 150;
+        lineLength = 100;
 
         demo.save();
 
@@ -75,6 +75,17 @@
         demo.restore();
     }
 
+    demo.lineFromTo = function (vStart, vEnd) {
+
+        demo.strokeStyle = '#ffffff';
+        demo.lineWidth = .5;
+
+        demo.moveTo(vStart.x, vStart.y);
+        demo.lineTo(vEnd.x, vEnd.y);
+        demo.stroke();
+
+    }
+
     demo.plotPoint = function (x, y, radius, color, colorShape) {
         _radius = radius || 10;
         _color = color || '#fff';
@@ -90,8 +101,8 @@
     }
 
     var vCenter = new Vector2D(demo.width * .5, demo.height * .5)
-    var vPlot = new Vector2D(0, 100);
-    var vAdd = new Vector2D(0, 1);
+    var vPlot = new Vector2D(0, 0);
+    //    var vAdd = new Vector2D(0, 1);
 
 
     demo.setup = function () {
@@ -105,9 +116,8 @@
 
 
     demo.update = function () {
-        stepper += stepLength;
-
-
+        stepLength = 2 * Math.PI / CONFIG.NUM_SAMPLES;
+        stepper += stepLength * CONFIG.SPEED;
     };
 
 
@@ -115,19 +125,17 @@
 
         demo.globalCompositeOperation = 'add';
 
-        for (var i = 0; i < numSteps; i++) {
+        for (var i = 0, length = CONFIG.NUM_SAMPLES; i < length; i++) {
             phi += stepLength;
 
-            vPlot.toPolar();
-            vPlot.y = phi;
-            vPlot.x = CONFIG.RADIUS + CONFIG.WAVE_HEIGHT * Math.cos(CONFIG.M * phi);
-            vPlot.toCartesian();
+            vPlot.x = 1 * Math.sin(CONFIG.A * phi + CONFIG.DELTA + stepper);
+            vPlot.y = 1 * Math.sin(CONFIG.B * phi);
 
-//            vPlot.rotate(radius);
+            vPlot.multiply(CONFIG.MULTIPLYER);
 
             var vResult = Vector2D.add(vCenter, vPlot);
-            demo.plotPoint(vResult.x, vResult.y, .1, '#d48620');
-            demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper)
+            demo.plotPoint(vResult.x, vResult.y, .1, '#fff');
+            demo.lineFromTo(vCenter, vResult);
 
         }
 
@@ -138,30 +146,37 @@
 
         CONFIG = {};
         CONFIG.INFO = 'PARAMS';
-        CONFIG.RADIUS = 200;
-        CONFIG.WAVE_HEIGHT = 40;
-        CONFIG.M = 3;
+        CONFIG.A = 1;
+        CONFIG.B = 1;
+        CONFIG.DELTA = Math.PI * .5;
+        CONFIG.SPEED = 1;
+        CONFIG.MULTIPLYER = 150;
+        CONFIG.NUM_SAMPLES = 500;
 
 
-        var _radius = GUI.add(CONFIG, 'RADIUS').min(-300).max(300).step(1).onChange(update_datGUI);
-        var _waveHeight = GUI.add(CONFIG, 'WAVE_HEIGHT').min(-300).max(300).step(1).onChange(update_datGUI);
-        var _m = GUI.add(CONFIG, 'M').min(1).max(15).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'A').min(1).max(15).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'B').min(1).max(15).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'DELTA').min(0).max(TWO_PI).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'SPEED').min(0.0).max(3.0).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'MULTIPLYER').min(-300).max(300).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'NUM_SAMPLES').min(1).max(1000).step(1).onChange(update_datGUI);
     }
 
     function update_datGUI() {
-
     }
+
+
 
     demo.mousemove = function () {
     };
 
     demo.mousedown = function () {
         mouseDown = true;
-    }
+    };
 
     demo.mouseup = function () {
         mouseDown = false;
-    }
+    };
 
     degToRad = function (deg) {
         return deg * 0.0174532925;
