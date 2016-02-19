@@ -47,6 +47,7 @@
         container: document.getElementById('container'),
         type: Sketch.CANVAS,
         autoclear: true,
+        interval: 2,
         retina: false
     });
 
@@ -115,8 +116,11 @@
 
         demo.globalCompositeOperation = 'add';
 
+
+
         for (var i = 0; i < numSteps; i++) {
             phi += stepLength;
+
 
             vPlot.toPolar();
             vPlot.y = phi;
@@ -128,6 +132,7 @@
             var vResult = Vector2D.add(vCenter, vPlot);
             demo.plotPoint(vResult.x, vResult.y, .1, '#d48620');
             demo.line(vResult.x, vResult.y, Math.sin(5 * phi) + stepper)
+
 
         }
 
