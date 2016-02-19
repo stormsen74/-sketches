@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="js/TweenLite.min.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="js/Vector2D.js"></script>
+    <script src="js/color.js"></script>
+    <script src="js/sketch.js"></script>
+
+    <style type="text/css">
+        html, body {
+            background: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="container"></div>
+
+
+<script>
+
+    var mouseDown = false;
+    var phi = 0;
+
+    var numSteps = 500;
+    var stepLength = .1;
+
+
+    var stepper = 0;
+
+    var GUI, CONFIG;
+
+    var c = net.brehaut.Color;
+    var color = c("#ffffff");
+    console.log(color.toCSS());
+
+
+    var demo = Sketch.create({
+        container: document.getElementById('container'),
+        type: Sketch.CANVAS,
+        autoclear: false,
+        retina: false
+    });
+
+    demo.line = function (x, y, rotation) {
+
+        lineLength = 100;
+
+        demo.save();
+
+        demo.translate(x, y);
+//        demo.rotate(degToRad(rotation));
+        demo.rotate(rotation);
+
+        demo.strokeStyle = color.toCSS();
+        demo.lineWidth = .5;
+
+        demo.beginPath();
+        demo.moveTo(-lineLength * .5, 0);
+        demo.lineTo(lineLength * .5, 0);
+//        demo.moveTo(0, 0);
+//        demo.lineTo(lineLength, 0);
+        demo.closePath();
+
+        demo.stroke();
+
+        demo.restore();
+    }
+
+    demo.lineFromTo = function (vStart, vEnd) {
+
+        demo.strokeStyle = '#ffffff';
+        demo.lineWidth = .5;
+
+        demo.moveTo(vStart.x, vStart.y);
+        demo.lineTo(vEnd.x, vEnd.y);
+        demo.stroke();
+
+    }
+
+    demo.plotPoint = function (x, y, radius, color, colorShape) {
+        _radius = radius || 10;
+        _color = color || '#fff';
+        _colorShape = colorShape || '#ccc';
+
+        demo.beginPath();
+        demo.lineWidth = 1;
+        demo.strokeStyle = _color;
+        demo.fillStyle = _colorShape;
+        demo.arc(x, y, _radius, 0, TWO_PI);
+        demo.fill();
+        demo.stroke();
+    }
+
+    var vCenter = new Vector2D(demo.width * .5, demo.height * .5)
+    var vPlot = new Vector2D(0, 0);
+    //    var vAdd = new Vector2D(0, 1);
+
+
+    demo.setup = function () {
+        console.log('setup');
+
+        demo.plotPoint(vCenter.x, vCenter.y, 1, '#ff0000');
+
+        init_datGUI();
+
+    };
+
+
+    demo.update = function () {
+//        stepLength = 2 * Math.PI / CONFIG.NUM_SAMPLES;
+//        stepper += stepLength * CONFIG.SPEED;
+    };
+
+    var vTempPoint = new Vector2D(0, 0);
+    var vPoint = new Vector2D(0, 0);
+
+    demo.draw = function () {
+
+        // https://en.wikipedia.org/wiki/Spirograph
+
+        demo.globalCompositeOperation = 'add';
+
+//        for (var i = 0, length = Math.PI * 2; i < length; i++) {
+
+        vPlot.x = (CONFIG.R - CONFIG.r) * Math.cos(phi) + CONFIG.p * Math.cos(((CONFIG.R - CONFIG.r) / CONFIG.r) * phi);
+        vPlot.y = (CONFIG.R - CONFIG.r) * Math.sin(phi) + CONFIG.p * Math.sin(((CONFIG.R - CONFIG.r) / CONFIG.r) * phi);
+
+        vPlot.multiply(CONFIG.MULTIPLYER);
+
+
+        vPoint = Vector2D.add(vCenter, vPlot);
+        demo.plotPoint(vPoint.x, vPoint.y, .1, '#fff');
+        if (phi > 0) {
+            demo.lineFromTo(vTempPoint, vPoint);
+        }
+        vTempPoint = vPoint
+        phi += CONFIG.step;
+        console.log(phi)
+        CONFIG.TIMES_PHI = (phi / Math.PI) + (phi % Math.PI);
+
+//        }
+
+    };
+
+    function init_datGUI() {
+        GUI = new dat.GUI({width: 500, closed: false});
+
+        CONFIG = {};
+        CONFIG.INFO = 'Spirograph';
+        CONFIG.TIMES_PHI = 0.0;
+        CONFIG.R = 3.4;
+        CONFIG.r = 10.3;
+        CONFIG.p = 6.6;
+        CONFIG.step = .1;
+        CONFIG.MULTIPLYER = 10;
+        CONFIG.CLEAR = function () {
+            demo.clear();
+        };
+        CONFIG.RESET = function () {
+            demo.clear();
+            phi = 0;
+        };
+
+        GUI.add(CONFIG, 'INFO');
+        GUI.add(CONFIG, 'TIMES_PHI').step(.01).listen();
+        GUI.add(CONFIG, 'R').min(0).max(5).step(.1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'r').min(0).max(5).step(.1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'p').min(0).max(10).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'step').min(0).max(3).step(.01).onChange(update_datGUI);
+        GUI.add(CONFIG, 'MULTIPLYER').min(-300).max(300).step(1).onChange(update_datGUI);
+        GUI.add(CONFIG, 'RESET');
+        GUI.add(CONFIG, 'CLEAR');
+    }
+
+    function update_datGUI() {
+        demo.clear();
+    }
+
+
+    demo.mousemove = function () {
+    };
+
+    demo.mousedown = function () {
+        mouseDown = true;
+    };
+
+    demo.mouseup = function () {
+        mouseDown = false;
+    };
+
+    degToRad = function (deg) {
+        return deg * 0.0174532925;
+    };
+
+    radToDeg = function (rad) {
+        return rad * 57.2957795;
+    };
+
+</script>
+</body>
+</html>
