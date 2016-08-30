@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            background: #222;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+
+<script src="js/TweenLite.min.js"></script>
+<script src="js/sketch.js"></script>
+<script src="js/Vector2D.js"></script>
+<script src="js/dat.gui.min.js"></script>
+<script>
+    // ----------------------------------------
+    // Example
+    // ----------------------------------------
+
+    var COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+    var radius = 100;
+    var GUI, CONFIG;
+    var TWO_PI = Math.PI * 2;
+    var centerX;
+    var centerY;
+
+    var demo = Sketch.create({
+        container: document.getElementById('container'),
+        type: Sketch.CANVAS,
+        autoclear: true
+    });
+
+    demo.setup = function () {
+        console.log('setup');
+
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+
+        init_datGUI();
+//        drawCall();
+
+    };
+
+
+    demo.lineFromTo = function (vStart, vEnd) {
+        demo.moveTo(vStart.x, vStart.y);
+        demo.lineTo(vEnd.x, vEnd.y);
+    }
+
+
+    branch = function (len) {
+
+
+        demo.save();
+
+        demo.strokeStyle = '#f00';
+        demo.lineWidth = 3;
+
+        demo.lineFromTo(new Vector2D(0, 0), new Vector2D(0, -len));
+        demo.stroke();
+
+        demo.translate(0, -len);
+        demo.rotate(CONFIG.ANGLE);
+        console.log('b:', len, CONFIG.ANGLE)
+
+
+        if (len > 4) {
+            branch(len * .67);
+        }
+
+//        demo.restore();
+
+
+    }
+
+    function drawCall() {
+
+        console.log('drawCall')
+
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+
+        demo.translate(centerX, demo.height);
+
+
+        branch(200);
+
+    }
+
+
+    demo.update = function () {
+        demo.clear();
+        console.log('update')
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+    }
+
+    demo.resize = function () {
+        console.log('resize')
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+//        drawCall();
+    }
+
+    demo.draw = function () {
+    };
+
+    demo.mousemove = function () {
+        //console.log('mouseMove')
+    };
+
+    demo.mousedown = function () {
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+        drawCall();
+    };
+
+
+    function init_datGUI() {
+        GUI = new dat.GUI({width: 500, closed: false});
+
+        CONFIG = {};
+        CONFIG.ANGLE = Math.PI * .25;
+        var a = GUI.add(CONFIG, 'ANGLE').min(0).max(TWO_PI).step(.01).onChange(update_datGUI);
+    }
+
+    function update_datGUI() {
+        centerX = demo.width * .5;
+        centerY = demo.height * .5;
+        drawCall();
+    }
+
+
+</script>
+</body>
+</html>
