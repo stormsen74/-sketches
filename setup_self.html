@@ -104,28 +104,41 @@
 				centerX = demo.width * .5;
 				centerY = demo.height * .5;
 
-				// p = new Particle();				// p.init(centerX, centerY, 100);				// p.draw(demo);
+				// p = new Particle();
+				// p.init(centerX, centerY, 100);
+				// p.draw(demo);
+
 				/*--------------------------------------------
 				~ recursive calls
-				--------------------------------------------*/				// createCircle(centerX, centerY, demo.height);				// cantor(0, centerY, demo.width)
-				var l = demo.width / 2;
-				lines(demo.width / 2 - l / 2, centerY, demo.width / 2)
-			};
+				--------------------------------------------*/
+				 createCircle(centerX, centerY, demo.height);
+
+				// cantor(0, centerY, demo.width)
+
+//				var l = demo.width / 2;
+//				lines(demo.width / 2 - l / 2, centerY, demo.width / 2)
+
+			};
 
 			function createCircle(x, y, radius) {
 				// p = new Particle();
 				// p.init(x, y, radius);
 				// particles.push(p);
-				// p.draw(demo);				demo.beginPath();
+				// p.draw(demo);
+
+				demo.beginPath();
 				demo.strokeStyle = '#E0E4CC';
 				demo.lineWidth = 1;
 				demo.arc(x, y, radius, 0, TWO_PI);
-				demo.stroke();				if (radius > 50) {
+				demo.stroke();
+
+				if (radius > 100) {
 					createCircle(x + radius / 2, y, radius / 2)
 					createCircle(x - radius / 2, y, radius / 2)
 
 					createCircle(x, y + radius / 2, radius / 2)
-					createCircle(x, y - radius / 2, radius / 2)				}
+					createCircle(x, y - radius / 2, radius / 2)
+				}
 
 			}
 
@@ -153,7 +166,11 @@
 					demo.lineTo(x + len, y);
 					demo.stroke();
 
-					// y += 20;					lines(x, y - len / 2, len / 2);					lines(x + len, y + len / 2, len / 2);				}
+					// y += 20;
+					lines(x, y - len / 2, len / 2);
+					lines(x + len, y + len / 2, len / 2);
+
+				}
 			}
 
 
@@ -165,7 +182,8 @@
 				// p.move();
 
 				for (var i = 0; i < particles.length; i++) {
-					// particles[i].move();				};
+					// particles[i].move();
+				};
 			}
 
 			demo.draw = function() {
@@ -177,8 +195,11 @@
 				// particles[i].draw(demo);
 				// }
 
-				// p.draw(demo);				for (var i = 0; i < particles.length; i++) {
-					// particles[i].draw(demo);				};
+				// p.draw(demo);
+
+				for (var i = 0; i < particles.length; i++) {
+					// particles[i].draw(demo);
+				};
 			};
 
 			// function drawCall() {
